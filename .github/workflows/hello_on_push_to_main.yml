@@ -15,7 +15,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.temp_token }}
-          repository: acre3rdparty/Common-Workflows
+          repository: cousinit256/Common-Workflows
           event-type: "run-hello-world"
           client-payload: '{"repo_name": "${{ github.repository }}"}'
 
@@ -25,7 +25,7 @@ jobs:
 
           workflow_id=$(curl -s -H \
             "Authorization: token ${{ secrets.temp_token }}" \
-            "https://api.github.com/repos/acre3rdparty/Common-Workflows/actions/runs" \
+            "https://api.github.com/repos/cousinit256/Common-Workflows/actions/runs" \
             | jq -r '[.workflow_runs[] | select(.head_branch=="main" and .event=="repository_dispatch" and .display_title=="run-hello-world")] | sort_by(.created_at) | last | .id')
           echo "Common-Workflow workflow_id: $workflow_id"
 
@@ -39,13 +39,13 @@ jobs:
             echo "Waiting for workflow $workflow_id to complete..."
             sleep 30
             status=$(curl -s -H "Authorization: token ${{ secrets.temp_token }}" \
-              "https://api.github.com/repos/acre3rdparty/Common-Workflows/actions/runs/$workflow_id" \
+              "https://api.github.com/repos/cousinit256/Common-Workflows/actions/runs/$workflow_id" \
               | jq -r '.status')
           done
 
           conclusion=$(curl -s -H \
             "Authorization: token ${{ secrets.temp_token }}" \
-            "https://api.github.com/repos/acre3rdparty/Common-Workflows/actions/runs/$workflow_id" \
+            "https://api.github.com/repos/cousinit256/Common-Workflows/actions/runs/$workflow_id" \
             | jq -r '.conclusion')
 
           echo "Common-Workflow conclusion: $conclusion"
