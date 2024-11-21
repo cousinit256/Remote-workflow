@@ -14,8 +14,8 @@ jobs:
         id: trigger_workflow
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.temp_token }}
-          repository: cousinit256/Common-Workflows
+          token: ${{ secrets.ACCESS_TOKEN }}
+          repository: cousinitinc/Common-Workflows
           event-type: "run-hello-world"
           client-payload: '{"repo_name": "${{ github.repository }}"}'
 
@@ -24,8 +24,8 @@ jobs:
           sleep 30
 
           workflow_id=$(curl -s -H \
-            "Authorization: token ${{ secrets.temp_token }}" \
-            "https://api.github.com/repos/cousinit256/Common-Workflows/actions/runs" \
+            "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
+            "https://api.github.com/repos/cousinitinc/Common-Workflows/actions/runs" \
             | jq -r '[.workflow_runs[] | select(.head_branch=="main" and .event=="repository_dispatch" and .display_title=="run-hello-world")] | sort_by(.created_at) | last | .id')
           echo "Common-Workflow workflow_id: $workflow_id"
 
@@ -38,17 +38,24 @@ jobs:
           while [[ "$status" == "in_progress" || "$status" == "queued" ]]; do
             echo "Waiting for workflow $workflow_id to complete..."
             sleep 30
-            status=$(curl -s -H "Authorization: token ${{ secrets.temp_token }}" \
-              "https://api.github.com/repos/cousinit256/Common-Workflows/actions/runs/$workflow_id" \
+            status=$(curl -s -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
+              "https://api.github.com/repos/cousinitinc/Common-Workflows/actions/runs/$workflow_id" \
               | jq -r '.status')
           done
 
           conclusion=$(curl -s -H \
-            "Authorization: token ${{ secrets.temp_token }}" \
-            "https://api.github.com/repos/cousinit256/Common-Workflows/actions/runs/$workflow_id" \
+            "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
+            "https://api.github.com/repos/cousinitinc/Common-Workflows/actions/runs/$workflow_id" \
             | jq -r '.conclusion')
 
           echo "Common-Workflow conclusion: $conclusion"
+
+          all_details=$(curl -s -H \
+            "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
+            "https://api.github.com/repos/cousinitinc/Common-Workflows/actions/runs/$workflow_id" \
+            | jq -r)
+
+          echo "all_details=$all_details"
 
           if [ "$conclusion" != "success" ]; then
             echo "Common-Workflow failed"
